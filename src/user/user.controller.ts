@@ -7,11 +7,16 @@ import {
   Param,
   Delete,
   ParseUUIDPipe,
+  UseGuards,
+  Req,
 } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { CreateUserDto, UpdateUserDto } from "./dto/user.dto";
 import { CreateMerchantDto, UpdateMerchantDto } from "./dto/merchant.dto.";
 import { CreateDeliveryDto, UpdateDeliveryDto } from "./dto/delivery.dto";
+import { JwtGuard } from "src/auth/guards/jwt.guard";
+import { ApiBearerAuth } from "@nestjs/swagger";
+import type { Request } from "express";
 
 @Controller("")
 export class UserController {
@@ -24,9 +29,24 @@ export class UserController {
     return this.userService.createUser(createUserDto);
   }
 
+  @ApiBearerAuth("JWT-auth")
+  @UseGuards(JwtGuard)
   @Get("/user")
-  findAllUsers() {
-    return this.userService.findAllUsers();
+  findAllUsers(@Req() req: Request) {
+    console.log(req.user);
+    return this.userService.findAllUsers({
+      select: {
+        id: true,
+        username: true,
+        firstName: true,
+        middleName: true,
+        lastName: true,
+        email: true,
+        createdAt: true,
+        isActive: true,
+        role: true,
+      },
+    });
   }
 
   @Get("/user/:id")
@@ -35,13 +55,16 @@ export class UserController {
   }
 
   @Patch("/user/:id")
-  updateUser(@Param("id") id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.updateUser(+id, updateUserDto);
+  updateUser(
+    @Param("id", ParseUUIDPipe) id: string,
+    @Body() updateUserDto: UpdateUserDto
+  ) {
+    return this.userService.updateUser(id, updateUserDto);
   }
 
   @Delete("/user/:id")
-  removeUser(@Param("id") id: string) {
-    return this.userService.removeUser(+id);
+  removeUser(@Param("id", ParseUUIDPipe) id: string) {
+    return this.userService.removeUser(id);
   }
 
   // Merchant Endpoints
@@ -52,7 +75,18 @@ export class UserController {
 
   @Get("/merchant")
   findAllMerchants() {
-    return this.userService.findAllMerchants();
+    return this.userService.findAllMerchants({
+      select: {
+        id: true,
+        username: true,
+        firstName: true,
+        middleName: true,
+        lastName: true,
+        email: true,
+        createdAt: true,
+        isActive: true,
+      },
+    });
   }
 
   @Get("/merchant/:id")
@@ -62,14 +96,14 @@ export class UserController {
 
   @Patch("/merchant/:id")
   updateMerchant(
-    @Param("id") id: string,
+    @Param("id", ParseUUIDPipe) id: string,
     @Body() updateMerchantDto: UpdateMerchantDto
   ) {
     return this.userService.updateMerchant(id, updateMerchantDto);
   }
 
   @Delete("/merchant/:id")
-  removeMerchant(@Param("id") id: string) {
+  removeMerchant(@Param("id", ParseUUIDPipe) id: string) {
     return this.userService.removeMerchant(id);
   }
 
@@ -81,7 +115,18 @@ export class UserController {
 
   @Get("/delivery")
   findAllDeliveries() {
-    return this.userService.findAllDeliveries();
+    return this.userService.findAllDeliveries({
+      select: {
+        id: true,
+        username: true,
+        firstName: true,
+        middleName: true,
+        lastName: true,
+        email: true,
+        createdAt: true,
+        isActive: true,
+      },
+    });
   }
 
   @Get("/delivery/:id")
@@ -91,14 +136,14 @@ export class UserController {
 
   @Patch("/delivery/:id")
   updateDelivery(
-    @Param("id") id: string,
+    @Param("id", ParseUUIDPipe) id: string,
     @Body() updateDeliveryDto: UpdateDeliveryDto
   ) {
-    return this.userService.updateDelivery(+id, updateDeliveryDto);
+    return this.userService.updateDelivery(id, updateDeliveryDto);
   }
 
   @Delete("/delivery/:id")
-  removeDelivery(@Param("id") id: string) {
-    return this.userService.removeDelivery(+id);
+  removeDelivery(@Param("id", ParseUUIDPipe) id: string) {
+    return this.userService.removeDelivery(id);
   }
 }

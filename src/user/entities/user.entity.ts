@@ -11,7 +11,7 @@ export enum UserRole {
 export class User extends BaseUser {
   @Column({ type: "enum", enum: UserRole, enumName: "role" })
   role: UserRole;
-  @Column({ type: "decimal" })
+  @Column({ type: "decimal", default: 0 })
   balance: number;
   @OneToMany(() => Address, (address) => address.user)
   addresses: Address[];

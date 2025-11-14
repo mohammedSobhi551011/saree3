@@ -21,7 +21,17 @@ export class UserService {
 
   // User Methods
   createUser(createUserDto: CreateUserDto) {
-    return "This action adds a new user";
+    const { email, firstName, lastName, middleName, password, username } =
+      createUserDto;
+    const user = this.userRepo.create({
+      email,
+      firstName,
+      lastName,
+      middleName,
+      password,
+      username,
+    });
+    return this.userRepo.save(user);
   }
 
   findAllUsers(options?: FindManyOptions<User>) {
@@ -38,12 +48,35 @@ export class UserService {
     return user;
   }
 
-  updateUser(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async updateUser(id: string, updateUserDto: UpdateUserDto) {
+    const { email, firstName, lastName, middleName, username } = updateUserDto;
+    const user = await this.findExistingOneUser({ where: { id } });
+    if (username && username !== user.username) {
+      const usernameExists = await this.userRepo.exists({
+        where: { username, id: Not(id) },
+      });
+      if (usernameExists)
+        throw new NotFoundException(
+          "Username already exists. Please choose another one."
+        );
+    }
+    if (email) user.email = email;
+    if (firstName) user.firstName = firstName;
+    if (lastName) user.lastName = lastName;
+    if (middleName) user.middleName = middleName;
+    if (username) user.username = username;
+    return this.userRepo.save(user);
   }
 
-  removeUser(id: number) {
-    return `This action removes a #${id} user`;
+  async toggleUserActivation(id: string, isActive: boolean) {
+    const user = await this.findExistingOneUser({ where: { id } });
+    user.isActive = isActive;
+    return this.userRepo.save(user);
+  }
+
+  async removeUser(id: string) {
+    const user = await this.findExistingOneUser({ where: { id } });
+    return this.userRepo.remove(user);
   }
 
   // Merchant Methods
@@ -109,7 +142,17 @@ export class UserService {
 
   // Delivery Methods
   createDelivery(createDeliveryDto: CreateDeliveryDto) {
-    return "This action adds a new delivery";
+    const { email, firstName, lastName, middleName, password, username } =
+      createDeliveryDto;
+    const delivery = this.deliveryRepo.create({
+      email,
+      firstName,
+      lastName,
+      middleName,
+      password,
+      username,
+    });
+    return this.deliveryRepo.save(delivery);
   }
   findAllDeliveries(options?: FindManyOptions<Delivery>) {
     return this.deliveryRepo.find(options);
@@ -122,10 +165,33 @@ export class UserService {
     if (!delivery) throw new NotFoundException("Delivery is not found.");
     return delivery;
   }
-  updateDelivery(id: number, updateDeliveryDto: UpdateDeliveryDto) {
-    return `This action updates a #${id} delivery`;
+  async updateDelivery(id: string, updateDeliveryDto: UpdateDeliveryDto) {
+    const { email, firstName, lastName, middleName, username } =
+      updateDeliveryDto;
+    const delivery = await this.findExistingOneDelivery({ where: { id } });
+    if (username && username !== delivery.username) {
+      const usernameExists = await this.deliveryRepo.exists({
+        where: { username, id: Not(id) },
+      });
+      if (usernameExists)
+        throw new NotFoundException(
+          "Username already exists. Please choose another one."
+        );
+    }
+    if (email) delivery.email = email;
+    if (firstName) delivery.firstName = firstName;
+    if (lastName) delivery.lastName = lastName;
+    if (middleName) delivery.middleName = middleName;
+    if (username) delivery.username = username;
+    return this.deliveryRepo.save(delivery);
   }
-  removeDelivery(id: number) {
-    return `This action removes a #${id} delivery`;
+  async toggleDeliveryActivation(id: string, isActive: boolean) {
+    const delivery = await this.findExistingOneDelivery({ where: { id } });
+    delivery.isActive = isActive;
+    return this.deliveryRepo.save(delivery);
+  }
+  async removeDelivery(id: string) {
+    const delivery = await this.findExistingOneDelivery({ where: { id } });
+    return this.deliveryRepo.remove(delivery);
   }
 }
