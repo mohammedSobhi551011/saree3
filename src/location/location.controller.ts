@@ -21,6 +21,7 @@ import {
 import {
   CityResponseDto,
   CreateCityDto,
+  QueryCitiesDto,
   QueryCityDto,
   UpdateCityDto,
 } from "./dto/city.dto";
@@ -75,7 +76,7 @@ export class LocationController {
 
   @ApiOkResponse({ type: CityResponseDto })
   @Get("city")
-  findAllCity(@Query() query: QueryCityDto) {
+  findAllCity(@Query() query: QueryCitiesDto) {
     const { limit, name, page, governmentId, hasGovernment } = query;
 
     return this.locationService.findAllCities({
@@ -87,6 +88,22 @@ export class LocationController {
       take: limit,
       skip: page && limit ? (page - 1) * limit : undefined,
       relations: { government: hasGovernment === "true" },
+    });
+  }
+
+  @ApiOkResponse({ type: CityResponseDto })
+  @Get("city/:id")
+  findCity(@Query() query: QueryCityDto, @Param("id",ParseIntPipe) id:number) {
+    const { hasMarkets, hasGovernment } = query;
+
+    return this.locationService.findOneCity({
+      select: { id: true, name: true, government: { id: true, name: true },markets:{id:true,name:true,address:true,owner:{id:true,username:true,fullName:true}} },
+      where: {
+        id,
+      },
+      relations: { government: hasGovernment === "true",markets:{
+        owner: hasMarkets==="true"
+      } },
     });
   }
 

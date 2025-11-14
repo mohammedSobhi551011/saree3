@@ -30,7 +30,7 @@ export class CreateCityDto {
   governmentId: number;
 }
 
-export class QueryCityDto extends QueryDto {
+export class QueryCitiesDto extends QueryDto {
   @ApiProperty({
     description: "The name of the city to filter by",
     example: "York",
@@ -59,6 +59,27 @@ export class QueryCityDto extends QueryDto {
   @IsOptional()
   @IsEnum({ true: "true", false: "false" })
   hasGovernment?: "true" | "false";
+}
+
+
+export class QueryCityDto {
+  @ApiProperty({
+    description: "Get city with its government (true | false)",
+    example: "true",
+    required: false,
+  })
+  @IsOptional()
+  @IsEnum({ true: "true", false: "false" })
+  hasGovernment?: "true" | "false";
+
+  @ApiProperty({
+    description: "Get city with its markets (true | false)",
+    example: "true",
+    required: false,
+  })
+  @IsOptional()
+  @IsEnum({ true: "true", false: "false" })
+  hasMarkets?: "true" | "false";
 }
 
 export class UpdateCityDto extends PartialType(CreateCityDto) {

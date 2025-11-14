@@ -24,32 +24,32 @@ export class LocationService {
     return this.governmentRepo.find(options);
   }
 
-  findOneGovernementBy(options: FindOneOptions<Government>) {
+  findOneGovernement(options: FindOneOptions<Government>) {
     return this.governmentRepo.findOne(options);
   }
 
-  async findOneExistingGovernment(options: FindOneOptions<Government>) {
-    const government = await this.findOneGovernementBy(options);
+  async findExistingOneGovernment(options: FindOneOptions<Government>) {
+    const government = await this.findOneGovernement(options);
     if (!government) {
-      throw new NotFoundException('Government not found');
+      throw new NotFoundException('Government is not found');
     }
     return government;
   }
 
   async updateGovernment(id: number, updateGovernmentDto: UpdateGovernmentDto) {
-    const government = await this.findOneExistingGovernment({ where: { id } });
+    const government = await this.findExistingOneGovernment({ where: { id } });
     government.name = updateGovernmentDto.name || government.name;
     return this.governmentRepo.save(government);
   }
 
   async removeGovernment(id: number) {
-    const government = await this.findOneExistingGovernment({ where: { id } });
+    const government = await this.findExistingOneGovernment({ where: { id } });
     return this.governmentRepo.remove(government);
   }
 
   async createCity(createCityDto: CreateCityDto) {
     const { name, governmentId } = createCityDto;
-    const government = await this.findOneExistingGovernment({
+    const government = await this.findExistingOneGovernment({
       where: { id: governmentId },
     });
     const city = this.cityRepo.create({ name, government });
@@ -60,23 +60,23 @@ export class LocationService {
     return this.cityRepo.find(options);
   }
 
-  findOneCityBy(options: FindOneOptions<City>) {
+  findOneCity(options: FindOneOptions<City>) {
     return this.cityRepo.findOne(options);
   }
 
-  async findOneExistingCity(options: FindOneOptions<City>) {
-    const city = await this.findOneCityBy(options);
+  async findExistingOneCity(options: FindOneOptions<City>) {
+    const city = await this.findOneCity(options);
     if (!city) {
-      throw new NotFoundException('City not found');
+      throw new NotFoundException('City is not found');
     }
     return city;
   }
 
   async updateCity(id: number, updateCityDto: UpdateCityDto) {
-    const city = await this.findOneExistingCity({ where: { id } });
+    const city = await this.findExistingOneCity({ where: { id } });
     city.name = updateCityDto.name || city.name;
     if (updateCityDto.governmentId) {
-      const government = await this.findOneExistingGovernment({
+      const government = await this.findExistingOneGovernment({
         where: { id: updateCityDto.governmentId },
       });
       city.government = government;
@@ -85,7 +85,7 @@ export class LocationService {
   }
 
   async removeCity(id: number) {
-    const city = await this.findOneExistingCity({ where: { id } });
+    const city = await this.findExistingOneCity({ where: { id } });
     return this.cityRepo.remove(city);
   }
 }

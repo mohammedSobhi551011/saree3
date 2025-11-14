@@ -1,18 +1,12 @@
-import { PasswordBase } from "src/common/entities/password-base.entity";
+import { BaseUser } from "src/common/entities/base-user.entity";
 import { Market } from "src/market/entities/market.entity";
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, OneToOne } from "typeorm";
 
 @Entity("merchants")
-export class Merchant extends PasswordBase{
-    @PrimaryGeneratedColumn("uuid")
-    id:string;
-    @Column("text")
-    fullname: string;
-    @Column("text")
-    email:string;
-    @Column("decimal")
-    balance:number
+export class Merchant extends BaseUser {
+  @Column({ type: "decimal", default: 0 })
+  balance: number;
 
-    @OneToOne(()=>Market,market=>market.owner,{onDelete:"SET NULL"})
-    market:Market | null
+  @OneToOne(() => Market, (market) => market.owner, { onDelete: "SET NULL" })
+  market: Market | null;
 }
