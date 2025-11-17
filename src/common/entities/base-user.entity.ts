@@ -7,6 +7,7 @@ import {
   UpdateDateColumn,
 } from "typeorm";
 import * as bcrypt from "bcrypt";
+import { UserRole } from "../types";
 
 export class BaseUser {
   @PrimaryGeneratedColumn("uuid")
@@ -30,6 +31,9 @@ export class BaseUser {
 
   @Column({ type: "boolean", default: true })
   isActive: boolean;
+
+  @Column({ type: "decimal", default: 0 })
+  balance: number;
 
   @BeforeInsert()
   async hashPassword() {

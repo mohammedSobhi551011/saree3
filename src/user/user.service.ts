@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import {
+  Injectable,
+  NotAcceptableException,
+  NotFoundException,
+} from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "./entities/user.entity";
 import { FindManyOptions, FindOneOptions, Not, Repository } from "typeorm";
@@ -7,6 +11,7 @@ import { Delivery } from "./entities/delivery.entity";
 import { CreateMerchantDto, UpdateMerchantDto } from "./dto/merchant.dto.";
 import { CreateUserDto, UpdateUserDto } from "./dto/user.dto";
 import { CreateDeliveryDto, UpdateDeliveryDto } from "./dto/delivery.dto";
+import { DeliveryRole, MerchantRole, UserRole } from "src/common/types";
 
 @Injectable()
 export class UserService {
@@ -21,7 +26,7 @@ export class UserService {
 
   // User Methods
   createUser(createUserDto: CreateUserDto) {
-    const { email, firstName, lastName, middleName, password, username } =
+    const { email, firstName, lastName, middleName, password, username, role } =
       createUserDto;
     const user = this.userRepo.create({
       email,
@@ -30,6 +35,7 @@ export class UserService {
       middleName,
       password,
       username,
+      role,
     });
     return this.userRepo.save(user);
   }
@@ -90,6 +96,7 @@ export class UserService {
       middleName,
       password,
       username,
+      role: MerchantRole.MERCHANT,
     });
     return this.merchantRepo.save(merchant);
   }
@@ -151,6 +158,7 @@ export class UserService {
       middleName,
       password,
       username,
+      role: DeliveryRole.DELIVERY,
     });
     return this.deliveryRepo.save(delivery);
   }

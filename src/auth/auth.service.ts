@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
-import { UserPayload } from "src/common/types";
+import { UserPayload, UserRole } from "src/common/types";
 import { CreateDeliveryDto } from "src/user/dto/delivery.dto";
 import { CreateMerchantDto } from "src/user/dto/merchant.dto.";
 import { CreateUserDto } from "src/user/dto/user.dto";
@@ -34,11 +34,7 @@ export class AuthService {
       role: user.role,
       email: user.email,
     };
-    return {
-      access_token: this.jwtService.sign(payload, {
-        secret: process.env.JWT_SECRET_KEY || "defaultSecretKey",
-      }),
-    };
+    return this.jwtSignIn(payload);
   }
 
   async userSignup(createUserDto: CreateUserDto) {
@@ -47,12 +43,9 @@ export class AuthService {
       username: user.username,
       sub: user.id,
       email: user.email,
+      role: user.role,
     };
-    return {
-      access_token: this.jwtService.sign(payload, {
-        secret: process.env.JWT_SECRET_KEY || "defaultSecretKey",
-      }),
-    };
+    return this.jwtSignIn(payload);
   }
 
   // Merchant Methods
@@ -68,12 +61,9 @@ export class AuthService {
       username: user.username,
       sub: user.id,
       email: user.email,
+      role: user.role,
     };
-    return {
-      access_token: this.jwtService.sign(payload, {
-        secret: process.env.JWT_SECRET_KEY || "defaultSecretKey",
-      }),
-    };
+    return this.jwtSignIn(payload);
   }
   async merchantSignup(createMerchantDto: CreateMerchantDto) {
     const user = await this.userService.createMerchant(createMerchantDto);
@@ -81,12 +71,9 @@ export class AuthService {
       username: user.username,
       sub: user.id,
       email: user.email,
+      role: user.role,
     };
-    return {
-      access_token: this.jwtService.sign(payload, {
-        secret: process.env.JWT_SECRET_KEY || "defaultSecretKey",
-      }),
-    };
+    return this.jwtSignIn(payload);
   }
 
   // Delivery Methods
@@ -102,12 +89,9 @@ export class AuthService {
       username: user.username,
       sub: user.id,
       email: user.email,
+      role: user.role,
     };
-    return {
-      access_token: this.jwtService.sign(payload, {
-        secret: process.env.JWT_SECRET_KEY || "defaultSecretKey",
-      }),
-    };
+    return this.jwtSignIn(payload);
   }
 
   async deliverySignup(createDeliveryDto: CreateDeliveryDto) {
@@ -116,9 +100,14 @@ export class AuthService {
       username: user.username,
       sub: user.id,
       email: user.email,
+      role: user.role,
     };
+    return this.jwtSignIn(payload);
+  }
+
+  async jwtSignIn(payload: UserPayload) {
     return {
-      access_token: this.jwtService.sign(payload, {
+      accessToken: this.jwtService.sign(payload, {
         secret: process.env.JWT_SECRET_KEY || "defaultSecretKey",
       }),
     };

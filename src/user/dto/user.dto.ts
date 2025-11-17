@@ -8,6 +8,7 @@ import {
   Max,
   MaxLength,
 } from "class-validator";
+import { UserRole } from "src/common/types";
 
 export class CreateUserDto {
   @ApiProperty({
@@ -69,6 +70,15 @@ export class CreateUserDto {
   @IsNotEmpty()
   @MaxLength(50)
   password: string;
+
+  @ApiProperty({
+    enum: UserRole,
+    enumName: "user's role",
+    example: "user",
+    description: "Role of user",
+  })
+  @IsEnum(UserRole)
+  role: UserRole;
 }
 
 export class UpdateUserDto {
@@ -131,6 +141,17 @@ export class UpdateUserDto {
   @IsNotEmpty()
   @IsEmail()
   email?: string;
+
+  @ApiProperty({
+    enum: UserRole,
+    enumName: "user's role",
+    example: "user",
+    description: "Role of user",
+    required: false,
+  })
+  @IsEnum(UserRole)
+  @IsOptional()
+  role?: UserRole;
 }
 
 export class UserActivationTriggerDto {

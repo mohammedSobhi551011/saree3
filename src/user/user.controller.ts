@@ -17,6 +17,9 @@ import { CreateDeliveryDto, UpdateDeliveryDto } from "./dto/delivery.dto";
 import { JwtGuard } from "src/auth/guards/jwt.guard";
 import { ApiBearerAuth } from "@nestjs/swagger";
 import type { Request } from "express";
+import { Roles } from "./decorators/roles.decorator";
+import { DeliveryRole, UserRole } from "src/common/types";
+import { RolesGuard } from "./guards/roles.guard";
 
 @Controller("")
 export class UserController {
@@ -29,11 +32,11 @@ export class UserController {
     return this.userService.createUser(createUserDto);
   }
 
-  @ApiBearerAuth("JWT-auth")
-  @UseGuards(JwtGuard)
+  // @ApiBearerAuth("JWT-auth")
+  // @Roles(UserRole.ADMIN)
+  // @UseGuards(JwtGuard, RolesGuard)
   @Get("/user")
-  findAllUsers(@Req() req: Request) {
-    console.log(req.user);
+  findAllUsers() {
     return this.userService.findAllUsers({
       select: {
         id: true,
