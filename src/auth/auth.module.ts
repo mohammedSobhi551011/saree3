@@ -5,10 +5,14 @@ import { UserModule } from "src/user/user.module";
 import { PassportModule } from "@nestjs/passport";
 import { JwtModule } from "@nestjs/jwt";
 import { JwtStrategy } from "./jwt.strategy";
+import { DeliveryModule } from "src/delivery/delivery.module";
+import { MerchantModule } from "src/merchant/merchant.module";
 
 @Module({
   imports: [
     UserModule,
+    DeliveryModule,
+    MerchantModule,
     PassportModule.register({ defaultStrategy: "jwt" }),
     JwtModule.register({
       secret: process.env.JWT_SECRET_KEY || "defaultSecretKey",

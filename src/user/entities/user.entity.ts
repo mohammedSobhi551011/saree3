@@ -2,7 +2,11 @@ import { Column, Entity, OneToMany } from "typeorm";
 import { Address } from "./address.entity";
 import { Order } from "src/order/entities/order.entity";
 import { BaseUser } from "src/common/entities/base-user.entity";
-import { UserRole } from "src/common/types";
+
+export enum UserRole {
+  ADMIN = "admin",
+  USER = "user",
+}
 
 @Entity("users")
 export class User extends BaseUser {

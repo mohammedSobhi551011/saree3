@@ -7,7 +7,7 @@ import {
 } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import { Observable } from "rxjs";
-import { Role, UserPayload } from "src/common/types";
+import { AuthPayload, Role } from "src/common/types";
 import { ROLES_KEY } from "../decorators/roles.decorator";
 
 @Injectable()
@@ -23,7 +23,7 @@ export class RolesGuard implements CanActivate {
     if (!requiredRoles || requiredRoles.length === 0) return true;
 
     const req = context.switchToHttp().getRequest();
-    const userPayload = req.user as UserPayload | null;
+    const userPayload = req.user as AuthPayload | null;
     if (!userPayload) throw new UnauthorizedException();
     const hasRole = requiredRoles.some((role) => userPayload.role === role);
     if (!hasRole) throw new ForbiddenException();

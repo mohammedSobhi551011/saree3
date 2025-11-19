@@ -8,36 +8,66 @@ import {
   Delete,
   ParseUUIDPipe,
   UseGuards,
-  Req,
+  Query,
 } from "@nestjs/common";
 import { UserService } from "./user.service";
-import { CreateUserDto, UpdateUserDto } from "./dto/user.dto";
-import { CreateMerchantDto, UpdateMerchantDto } from "./dto/merchant.dto.";
-import { CreateDeliveryDto, UpdateDeliveryDto } from "./dto/delivery.dto";
+import { CreateUserDto, UpdateUserDto, UserQueryDto } from "./dto/user.dto";
 import { JwtGuard } from "src/auth/guards/jwt.guard";
 import { ApiBearerAuth } from "@nestjs/swagger";
-import type { Request } from "express";
 import { Roles } from "./decorators/roles.decorator";
-import { DeliveryRole, UserRole } from "src/common/types";
 import { RolesGuard } from "./guards/roles.guard";
+import { Like } from "typeorm";
+import {
+  getBooleanFromString,
+  getNumberRangeFindOperator,
+  getWhereOrOptions,
+} from "src/helpers";
+import { User, UserRole } from "./entities/user.entity";
 
-@Controller("")
+@Controller("/user")
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  // User Endpoints
-
-  @Post("/user")
-  createUser(@Body() createUserDto: CreateUserDto) {
-    return this.userService.createUser(createUserDto);
+  @Post("/")
+  create(@Body() createUserDto: CreateUserDto) {
+    return this.userService.create(createUserDto);
   }
 
-  // @ApiBearerAuth("JWT-auth")
-  // @Roles(UserRole.ADMIN)
-  // @UseGuards(JwtGuard, RolesGuard)
-  @Get("/user")
-  findAllUsers() {
-    return this.userService.findAllUsers({
+  @ApiBearerAuth("JWT-auth")
+  @Roles(UserRole.ADMIN)
+  @UseGuards(JwtGuard, RolesGuard)
+  @Get("/")
+  findAll(@Query() query: UserQueryDto) {
+    const {
+      limit,
+      page,
+      email,
+      withAddresses,
+      isActive,
+      name,
+      maxBalance,
+      minBalance,
+      role,
+      cityId,
+      governmentId,
+    } = query;
+    return this.userService.findAll({
+      where: getWhereOrOptions<User>(
+        [
+          { firstName: name ? Like(`%${name}%`) : undefined },
+          { middleName: name ? Like(`%${name}%`) : undefined },
+          { lastName: name ? Like(`%${name}%`) : undefined },
+        ],
+        {
+          email,
+          isActive: getBooleanFromString(isActive),
+          role,
+          balance: getNumberRangeFindOperator(minBalance, maxBalance),
+          addresses: {
+            city: { id: cityId, government: { id: governmentId } },
+          },
+        }
+      ),
       select: {
         id: true,
         username: true,
@@ -48,105 +78,54 @@ export class UserController {
         createdAt: true,
         isActive: true,
         role: true,
+        balance: true,
+        addresses: {
+          id: true,
+          address1: true,
+          address2: true,
+          street: true,
+          city: { id: true, name: true, government: { id: true, name: true } },
+        },
+      },
+      relations: {
+        addresses: getBooleanFromString(withAddresses)
+          ? { city: { government: true } }
+          : undefined,
+      },
+      take: limit,
+      skip: (page - 1) * limit,
+    });
+  }
+
+  @Get(":id")
+  findOne(@Param("id", ParseUUIDPipe) id: string) {
+    return this.userService.findExistingOne({
+      where: { id },
+      select: {
+        id: true,
+        username: true,
+        firstName: true,
+        middleName: true,
+        lastName: true,
+        email: true,
+        createdAt: true,
+        isActive: true,
+        role: true,
+        balance: true,
       },
     });
   }
 
-  @Get("/user/:id")
-  findOneUser(@Param("id", ParseUUIDPipe) id: string) {
-    return this.userService.findExistingOneUser({ where: { id } });
-  }
-
-  @Patch("/user/:id")
-  updateUser(
+  @Patch(":id")
+  update(
     @Param("id", ParseUUIDPipe) id: string,
     @Body() updateUserDto: UpdateUserDto
   ) {
-    return this.userService.updateUser(id, updateUserDto);
+    return this.userService.update(id, updateUserDto);
   }
 
-  @Delete("/user/:id")
-  removeUser(@Param("id", ParseUUIDPipe) id: string) {
-    return this.userService.removeUser(id);
-  }
-
-  // Merchant Endpoints
-  @Post("/merchant")
-  createMerchant(@Body() createMerchantDto: CreateMerchantDto) {
-    return this.userService.createMerchant(createMerchantDto);
-  }
-
-  @Get("/merchant")
-  findAllMerchants() {
-    return this.userService.findAllMerchants({
-      select: {
-        id: true,
-        username: true,
-        firstName: true,
-        middleName: true,
-        lastName: true,
-        email: true,
-        createdAt: true,
-        isActive: true,
-      },
-    });
-  }
-
-  @Get("/merchant/:id")
-  findOneMerchant(@Param("id", ParseUUIDPipe) id: string) {
-    return this.userService.findExistingOneMerchant({ where: { id } });
-  }
-
-  @Patch("/merchant/:id")
-  updateMerchant(
-    @Param("id", ParseUUIDPipe) id: string,
-    @Body() updateMerchantDto: UpdateMerchantDto
-  ) {
-    return this.userService.updateMerchant(id, updateMerchantDto);
-  }
-
-  @Delete("/merchant/:id")
-  removeMerchant(@Param("id", ParseUUIDPipe) id: string) {
-    return this.userService.removeMerchant(id);
-  }
-
-  // Delivery Endpoints
-  @Post("/delivery")
-  createDelivery(@Body() createDeliveryDto: CreateDeliveryDto) {
-    return this.userService.createDelivery(createDeliveryDto);
-  }
-
-  @Get("/delivery")
-  findAllDeliveries() {
-    return this.userService.findAllDeliveries({
-      select: {
-        id: true,
-        username: true,
-        firstName: true,
-        middleName: true,
-        lastName: true,
-        email: true,
-        createdAt: true,
-        isActive: true,
-      },
-    });
-  }
-
-  @Get("/delivery/:id")
-  findOneDelivery(@Param("id", ParseUUIDPipe) id: string) {
-    return this.userService.findExistingOneDelivery({ where: { id } });
-  }
-
-  @Patch("/delivery/:id")
-  updateDelivery(
-    @Param("id", ParseUUIDPipe) id: string,
-    @Body() updateDeliveryDto: UpdateDeliveryDto
-  ) {
-    return this.userService.updateDelivery(id, updateDeliveryDto);
-  }
-
-  @Delete("/delivery/:id")
-  removeDelivery(@Param("id", ParseUUIDPipe) id: string) {
-    return this.userService.removeDelivery(id);
+  @Delete(":id")
+  remove(@Param("id", ParseUUIDPipe) id: string) {
+    return this.userService.remove(id);
   }
 }

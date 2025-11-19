@@ -1,7 +1,10 @@
 import { BaseUser } from "src/common/entities/base-user.entity";
-import { DeliveryRole } from "src/common/types";
 import { Order } from "src/order/entities/order.entity";
 import { Column, Entity, OneToMany } from "typeorm";
+
+export enum DeliveryRole {
+  DELIVERY = "delivery",
+}
 
 @Entity("deliveries")
 export class Delivery extends BaseUser {

@@ -7,7 +7,6 @@ import {
   UpdateDateColumn,
 } from "typeorm";
 import * as bcrypt from "bcrypt";
-import { UserRole } from "../types";
 
 export class BaseUser {
   @PrimaryGeneratedColumn("uuid")

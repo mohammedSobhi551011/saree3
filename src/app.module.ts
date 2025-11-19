@@ -8,6 +8,8 @@ import { OrderModule } from "./order/order.module";
 import { LocationModule } from "./location/location.module";
 import { ConfigModule } from "@nestjs/config";
 import { AuthModule } from "./auth/auth.module";
+import { DeliveryModule } from './delivery/delivery.module';
+import { MerchantModule } from './merchant/merchant.module';
 
 @Module({
   imports: [
@@ -30,6 +32,8 @@ import { AuthModule } from "./auth/auth.module";
     OrderModule,
     LocationModule,
     AuthModule,
+    DeliveryModule,
+    MerchantModule,
   ],
   controllers: [AppController],
   providers: [AppService],

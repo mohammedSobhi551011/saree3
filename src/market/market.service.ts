@@ -5,12 +5,13 @@ import { Market } from "./entities/market.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 import { UserService } from "src/user/user.service";
 import { LocationService } from "src/location/location.service";
+import { MerchantService } from "src/merchant/merchant.service";
 
 @Injectable()
 export class MarketService {
   constructor(
     @InjectRepository(Market) protected readonly marketRepo: Repository<Market>,
-    protected readonly userService: UserService,
+    protected readonly merchantService: MerchantService,
     protected readonly locationService: LocationService
   ) {}
   async create(createMarketDto: CreateMarketDto) {
@@ -19,7 +20,7 @@ export class MarketService {
     const city = await this.locationService.findExistingOneCity({
       where: { id: cityId },
     });
-    const owner = await this.userService.findExistingOneMerchant({
+    const owner = await this.merchantService.findExistingOne({
       where: { id: ownerId },
     });
     newMarket.city = city;
@@ -54,7 +55,7 @@ export class MarketService {
       existingMarket.city = city;
     }
     if (ownerId) {
-      const owner = await this.userService.findExistingOneMerchant({
+      const owner = await this.merchantService.findExistingOne({
         where: { id: ownerId },
       });
       existingMarket.owner = owner;

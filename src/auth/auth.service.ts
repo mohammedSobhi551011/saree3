@@ -1,8 +1,12 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
-import { UserPayload, UserRole } from "src/common/types";
-import { CreateDeliveryDto } from "src/user/dto/delivery.dto";
-import { CreateMerchantDto } from "src/user/dto/merchant.dto.";
+import { AuthPayload } from "src/common/types";
+import { DeliveryService } from "src/delivery/delivery.service";
+import { CreateDeliveryDto } from "src/delivery/dto/delivery.dto";
+import { CreateMerchantDto } from "src/merchant/dto/merchant.dto.";
+import { MerchantService } from "src/merchant/merchant.service";
+// import { CreateDeliveryDto } from "src/user/dto/delivery.dto";
+// import { CreateMerchantDto } from "src/user/dto/merchant.dto.";
 import { CreateUserDto } from "src/user/dto/user.dto";
 import { UserService } from "src/user/user.service";
 
@@ -10,12 +14,18 @@ import { UserService } from "src/user/user.service";
 export class AuthService {
   constructor(
     private readonly userService: UserService,
+    private readonly merchantService: MerchantService,
+    private readonly deliveryService: DeliveryService,
     private readonly jwtService: JwtService
   ) {}
 
   // User Methods
-  async userLogin(username: string, password: string) {
-    const user = await this.userService.findOneUser({
+  async login(
+    username: string,
+    password: string,
+    service: UserService | MerchantService | DeliveryService
+  ) {
+    const user = await service.findOne({
       where: { username },
       select: {
         id: true,
@@ -28,7 +38,7 @@ export class AuthService {
     if (!user || (await user.comparePassword(password)) === false) {
       throw new BadRequestException("Invalid credentials");
     }
-    const payload: UserPayload = {
+    const payload: AuthPayload = {
       username: user.username,
       sub: user.id,
       role: user.role,
@@ -37,9 +47,16 @@ export class AuthService {
     return this.jwtSignIn(payload);
   }
 
-  async userSignup(createUserDto: CreateUserDto) {
-    const user = await this.userService.createUser(createUserDto);
-    const payload: UserPayload = {
+  // async signup(createDto:CreateUserDto|CreateMerchantDto|CreateDeliveryDto,service: UserService | MerchantService | DeliveryService){
+  async signup(
+    container:
+      | { createDto: CreateUserDto; service: UserService }
+      | { createDto: CreateMerchantDto; service: MerchantService }
+      | { createDto: CreateDeliveryDto; service: DeliveryService }
+  ) {
+    const { createDto, service } = container;
+    const user = await service.create(createDto);
+    const payload: AuthPayload = {
       username: user.username,
       sub: user.id,
       email: user.email,
@@ -47,65 +64,42 @@ export class AuthService {
     };
     return this.jwtSignIn(payload);
   }
+  // async userSignup(createUserDto: CreateUserDto) {
+  //   const user = await this.userService.create(createUserDto);
+  //   const payload: AuthPayload = {
+  //     username: user.username,
+  //     sub: user.id,
+  //     email: user.email,
+  //     role: user.role,
+  //   };
+  //   return this.jwtSignIn(payload);
+  // }
 
-  // Merchant Methods
-  async merchantLogin(username: string, password: string) {
-    const user = await this.userService.findOneMerchant({
-      where: { username },
-      select: { id: true, username: true, email: true, password: true },
-    });
-    if (!user || (await user.comparePassword(password)) === false) {
-      throw new BadRequestException("Invalid credentials");
-    }
-    const payload: UserPayload = {
-      username: user.username,
-      sub: user.id,
-      email: user.email,
-      role: user.role,
-    };
-    return this.jwtSignIn(payload);
-  }
-  async merchantSignup(createMerchantDto: CreateMerchantDto) {
-    const user = await this.userService.createMerchant(createMerchantDto);
-    const payload: UserPayload = {
-      username: user.username,
-      sub: user.id,
-      email: user.email,
-      role: user.role,
-    };
-    return this.jwtSignIn(payload);
-  }
+  // // Merchant Methods
+  // async merchantSignup(createMerchantDto: CreateMerchantDto) {
+  //   const user = await this.userService.create(createMerchantDto);
+  //   const payload: AuthPayload = {
+  //     username: user.username,
+  //     sub: user.id,
+  //     email: user.email,
+  //     role: user.role,
+  //   };
+  //   return this.jwtSignIn(payload);
+  // }
 
-  // Delivery Methods
-  async deliveryLogin(username: string, password: string) {
-    const user = await this.userService.findOneDelivery({
-      where: { username },
-      select: { id: true, username: true, email: true, password: true },
-    });
-    if (!user || (await user.comparePassword(password)) === false) {
-      throw new BadRequestException("Invalid credentials");
-    }
-    const payload: UserPayload = {
-      username: user.username,
-      sub: user.id,
-      email: user.email,
-      role: user.role,
-    };
-    return this.jwtSignIn(payload);
-  }
+  // // Delivery Methods
+  // async deliverySignup(createDeliveryDto: CreateDeliveryDto) {
+  //   const user = await this.userService.create(createDeliveryDto);
+  //   const payload: AuthPayload = {
+  //     username: user.username,
+  //     sub: user.id,
+  //     email: user.email,
+  //     role: user.role,
+  //   };
+  //   return this.jwtSignIn(payload);
+  // }
 
-  async deliverySignup(createDeliveryDto: CreateDeliveryDto) {
-    const user = await this.userService.createDelivery(createDeliveryDto);
-    const payload: UserPayload = {
-      username: user.username,
-      sub: user.id,
-      email: user.email,
-      role: user.role,
-    };
-    return this.jwtSignIn(payload);
-  }
-
-  async jwtSignIn(payload: UserPayload) {
+  async jwtSignIn(payload: AuthPayload) {
     return {
       accessToken: this.jwtService.sign(payload, {
         secret: process.env.JWT_SECRET_KEY || "defaultSecretKey",

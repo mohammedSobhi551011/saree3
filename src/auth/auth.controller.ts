@@ -6,38 +6,67 @@ import {
   MerchantSignInDto,
   UserSignInDto,
 } from "./dto/auth.dto";
+import { MerchantService } from "src/merchant/merchant.service";
+import { DeliveryService } from "src/delivery/delivery.service";
+import { UserService } from "src/user/user.service";
 
 @Controller("auth")
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly userService: UserService,
+    private readonly merchantService: MerchantService,
+    private readonly deliveryService: DeliveryService
+  ) {}
 
   // User Endpoints
   @Post("/login/user")
   async userLogin(@Body() loginDto: LoginDto) {
-    return this.authService.userLogin(loginDto.username, loginDto.password);
+    return this.authService.login(
+      loginDto.username,
+      loginDto.password,
+      this.userService
+    );
   }
   @Post("/signup/user")
   async userSignup(@Body() signInDto: UserSignInDto) {
-    return this.authService.userSignup(signInDto);
+    return this.authService.signup({
+      createDto: signInDto,
+      service: this.userService,
+    });
   }
 
-  // Merchant Endpoints
+  // // Merchant Endpoints
   @Post("/login/merchant")
   async merchantLogin(@Body() loginDto: LoginDto) {
-    return this.authService.merchantLogin(loginDto.username, loginDto.password);
+    return this.authService.login(
+      loginDto.username,
+      loginDto.password,
+      this.merchantService
+    );
   }
   @Post("/signup/merchant")
   async merchantSignup(@Body() signInDto: MerchantSignInDto) {
-    return this.authService.merchantSignup(signInDto);
+    return this.authService.signup({
+      createDto: signInDto,
+      service: this.merchantService,
+    });
   }
 
-  // Delivery Endpoints
+  // // Delivery Endpoints
   @Post("/login/delivery")
   async DeliveryLogin(@Body() loginDto: LoginDto) {
-    return this.authService.deliveryLogin(loginDto.username, loginDto.password);
+    return this.authService.login(
+      loginDto.username,
+      loginDto.password,
+      this.deliveryService
+    );
   }
   @Post("/signup/delivery")
   async DeliverySignup(@Body() deliverySignInDto: DeliverySignInDto) {
-    return this.authService.deliverySignup(deliverySignInDto);
+    return this.authService.signup({
+      createDto: deliverySignInDto,
+      service: this.deliveryService,
+    });
   }
 }

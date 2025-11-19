@@ -4,15 +4,13 @@ import { MarketController } from "./market.controller";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { Market } from "./entities/market.entity";
 import { MarketItem } from "./entities/market-item.entity";
-import { LocationService } from "src/location/location.service";
-import { UserService } from "src/user/user.service";
-import { UserModule } from "src/user/user.module";
 import { LocationModule } from "src/location/location.module";
+import { MerchantModule } from "src/merchant/merchant.module";
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Market, MarketItem]),
-    UserModule,
+    MerchantModule,
     LocationModule,
   ],
   controllers: [MarketController],
