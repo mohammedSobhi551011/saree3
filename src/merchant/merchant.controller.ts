@@ -2,16 +2,18 @@ import {
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   Param,
   ParseUUIDPipe,
   Patch,
-  Post,
   Query,
+  Req,
+  UseGuards,
 } from "@nestjs/common";
 import { MerchantService } from "./merchant.service";
 import {
-  CreateMerchantDto,
+  // CreateMerchantDto,
   MerchantQuery,
   UpdateMerchantDto,
 } from "./dto/merchant.dto.";
@@ -20,18 +22,28 @@ import {
   getNumberRangeFindOperator,
   getWhereOrOptions,
 } from "src/helpers";
-import { Merchant } from "./entities/merchant.entity";
+import { Merchant, MerchantRole } from "./entities/merchant.entity";
 import { IsNull, Like, Not } from "typeorm";
+import { Roles } from "src/auth/decorators/roles.decorator";
+import { UserRole } from "src/user/entities/user.entity";
+import type { Request } from "express";
+import { AuthPayload } from "src/common/types";
+import { ApiBearerAuth } from "@nestjs/swagger";
+import { JwtGuard } from "src/auth/guards/jwt.guard";
+import { RolesGuard } from "src/auth/guards/roles.guard";
 
 @Controller("merchant")
+@UseGuards(JwtGuard, RolesGuard)
+@ApiBearerAuth("JWT-auth")
 export class MerchantController {
   constructor(private readonly merchantService: MerchantService) {}
-  @Post("")
-  create(@Body() createMerchantDto: CreateMerchantDto) {
-    return this.merchantService.create(createMerchantDto);
-  }
+  // @Post("")
+  // create(@Body() createMerchantDto: CreateMerchantDto) {
+  //   return this.merchantService.create(createMerchantDto);
+  // }
 
-  @Get("")
+  @Roles(UserRole.ADMIN)
+  @Get("/")
   findAll(@Query() query: MerchantQuery) {
     const {
       limit,
@@ -95,6 +107,7 @@ export class MerchantController {
               name: true,
             }
           : undefined,
+        marketId: hasMarket ? true : undefined,
       },
       relations: {
         market: getBooleanFromString(withMarket)
@@ -106,20 +119,52 @@ export class MerchantController {
     });
   }
 
-  @Get(":id")
-  findOne(@Param("id", ParseUUIDPipe) id: string) {
-    return this.merchantService.findExistingOne({ where: { id } });
+  @Roles(UserRole.ADMIN, MerchantRole.MERCHANT)
+  @Get("/:id")
+  findOne(@Param("id", ParseUUIDPipe) id: string, @Req() req: Request) {
+    const { sub, role } = req.user as AuthPayload;
+    if (sub !== id && role !== UserRole.ADMIN) throw new ForbiddenException();
+
+    return this.merchantService.findExistingOne({
+      where: { id },
+      select: {
+        id: true,
+        balance: true,
+        email: true,
+        username: true,
+        firstName: true,
+        middleName: true,
+        lastName: true,
+        isActive: role === UserRole.ADMIN && sub !== id,
+        role: role === UserRole.ADMIN && sub !== id,
+        createdAt: role === UserRole.ADMIN && sub !== id,
+        updatedAt: role === UserRole.ADMIN && sub !== id,
+        market: {
+          id: true,
+          name: true,
+          address: true,
+          city: { id: true, name: true, government: { id: true, name: true } },
+        },
+      },
+      relations: {
+        market: { city: { government: true } },
+      },
+    });
   }
 
-  @Patch(":id")
+  @Patch("/:id")
   updateMerchant(
-    @Param("id", ParseUUIDPipe) id: string,
-    @Body() updateMerchantDto: UpdateMerchantDto
+    @Param("/id", ParseUUIDPipe) id: string,
+    @Body() updateMerchantDto: UpdateMerchantDto,
+    @Req() req: Request
   ) {
+    const { sub } = req.user as AuthPayload;
+    if (sub !== id) throw new ForbiddenException();
     return this.merchantService.update(id, updateMerchantDto);
   }
 
-  @Delete(":id")
+  @Roles(UserRole.ADMIN)
+  @Delete("/:id")
   remove(@Param("id", ParseUUIDPipe) id: string) {
     return this.merchantService.remove(id);
   }

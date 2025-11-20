@@ -2,12 +2,15 @@ import {
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   Param,
   ParseUUIDPipe,
   Patch,
   Post,
   Query,
+  Req,
+  UseGuards,
 } from "@nestjs/common";
 import {
   getBooleanFromString,
@@ -16,21 +19,27 @@ import {
 } from "src/helpers";
 import { Like } from "typeorm";
 import { DeliveryService } from "./delivery.service";
-import { Delivery } from "./entities/delivery.entity";
+import { Delivery, DeliveryRole } from "./entities/delivery.entity";
 import {
   CreateDeliveryDto,
   DeliveryQueryDto,
   UpdateDeliveryDto,
 } from "./dto/delivery.dto";
+import { JwtGuard } from "src/auth/guards/jwt.guard";
+import { RolesGuard } from "src/auth/guards/roles.guard";
+import { ApiBearerAuth } from "@nestjs/swagger";
+import { Roles } from "src/auth/decorators/roles.decorator";
+import { UserRole } from "src/user/entities/user.entity";
+import type { Request } from "express";
+import { AuthPayload } from "src/common/types";
 
 @Controller("delivery")
+@UseGuards(JwtGuard, RolesGuard)
+@ApiBearerAuth("JWT-auth")
 export class DeliveryController {
   constructor(private readonly deliveryService: DeliveryService) {}
-  @Post("/")
-  create(@Body() createDeliveryDto: CreateDeliveryDto) {
-    return this.deliveryService.create(createDeliveryDto);
-  }
 
+  @Roles(UserRole.ADMIN)
   @Get("/")
   findAll(@Query() query: DeliveryQueryDto) {
     const { limit, page, email, isActive, maxBalance, minBalance, name, role } =
@@ -81,8 +90,11 @@ export class DeliveryController {
     });
   }
 
+  @Roles(UserRole.ADMIN, DeliveryRole.DELIVERY)
   @Get(":id")
-  findOne(@Param("id", ParseUUIDPipe) id: string) {
+  findOne(@Param("id", ParseUUIDPipe) id: string, @Req() req: Request) {
+    const { role, sub } = req.user as AuthPayload;
+    if (sub !== id && role !== UserRole.ADMIN) throw new ForbiddenException();
     return this.deliveryService.findExistingOne({
       where: { id },
       select: {
@@ -92,10 +104,11 @@ export class DeliveryController {
         middleName: true,
         lastName: true,
         email: true,
-        createdAt: true,
-        isActive: true,
-        role: true,
         balance: true,
+        isActive: role === UserRole.ADMIN && sub !== id,
+        role: role === UserRole.ADMIN && sub !== id,
+        createdAt: role === UserRole.ADMIN && sub !== id,
+        updatedAt: role === UserRole.ADMIN && sub !== id,
       },
     });
   }
@@ -103,11 +116,15 @@ export class DeliveryController {
   @Patch(":id")
   update(
     @Param("id", ParseUUIDPipe) id: string,
-    @Body() updateDeliveryDto: UpdateDeliveryDto
+    @Body() updateDeliveryDto: UpdateDeliveryDto,
+    @Req() req: Request
   ) {
+    const { sub } = req.user as AuthPayload;
+    if (sub !== id) throw new ForbiddenException();
     return this.deliveryService.update(id, updateDeliveryDto);
   }
 
+  @Roles(UserRole.ADMIN)
   @Delete(":id")
   remove(@Param("id", ParseUUIDPipe) id: string) {
     return this.deliveryService.remove(id);

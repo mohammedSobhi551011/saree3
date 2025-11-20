@@ -19,11 +19,18 @@ export class UserService {
     const { email, firstName, lastName, middleName, password, username, role } =
       createUserDto;
 
-    const isExist = await this.userRepo.exists({
-      where: [{ username }, { email }],
+    const usernameExists = await this.userRepo.exists({
+      where: { username },
     });
-    if (isExist)
-      throw new NotAcceptableException("Username or email is already exists");
+    if (usernameExists)
+      throw new NotAcceptableException("Username is already exists");
+
+    const emailExists = await this.userRepo.exists({
+      where: { email },
+    });
+    if (emailExists)
+      throw new NotAcceptableException("Email is already exists");
+
     const user = this.userRepo.create({
       email,
       firstName,

@@ -17,11 +17,19 @@ export class DeliveryService {
   async create(createDeliveryDto: CreateDeliveryDto) {
     const { email, firstName, lastName, middleName, password, username } =
       createDeliveryDto;
-    const isExist = await this.deliveryRepo.exists({
-      where: [{ username }, { email }],
+
+    const usernameExists = await this.deliveryRepo.exists({
+      where: { username },
     });
-    if (isExist)
-      throw new NotAcceptableException("Username or email is already exists");
+    if (usernameExists)
+      throw new NotAcceptableException("Username is already exists");
+
+    const emailExists = await this.deliveryRepo.exists({
+      where: { email },
+    });
+    if (emailExists)
+      throw new NotAcceptableException("Email is already exists");
+
     const delivery = this.deliveryRepo.create({
       email,
       firstName,

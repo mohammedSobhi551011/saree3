@@ -145,16 +145,16 @@ export class UpdateUserDto {
   @IsEmail()
   email?: string;
 
-  @ApiProperty({
-    enum: UserRole,
-    enumName: "user's role",
-    example: "user",
-    description: "Role of user",
-    required: false,
-  })
-  @IsEnum(UserRole)
-  @IsOptional()
-  role?: UserRole;
+  // @ApiProperty({
+  //   enum: UserRole,
+  //   enumName: "user's role",
+  //   example: "user",
+  //   description: "Role of user",
+  //   required: false,
+  // })
+  // @IsEnum(UserRole)
+  // @IsOptional()
+  // role?: UserRole;
 }
 
 export class UserActivationTriggerDto {

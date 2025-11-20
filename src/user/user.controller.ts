@@ -9,13 +9,18 @@ import {
   ParseUUIDPipe,
   UseGuards,
   Query,
+  Req,
+  ForbiddenException,
 } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { CreateUserDto, UpdateUserDto, UserQueryDto } from "./dto/user.dto";
 import { JwtGuard } from "src/auth/guards/jwt.guard";
-import { ApiBearerAuth } from "@nestjs/swagger";
-import { Roles } from "./decorators/roles.decorator";
-import { RolesGuard } from "./guards/roles.guard";
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiResponse,
+  PickType,
+} from "@nestjs/swagger";
 import { Like } from "typeorm";
 import {
   getBooleanFromString,
@@ -23,19 +28,18 @@ import {
   getWhereOrOptions,
 } from "src/helpers";
 import { User, UserRole } from "./entities/user.entity";
+import { RolesGuard } from "src/auth/guards/roles.guard";
+import { Roles } from "src/auth/decorators/roles.decorator";
+import type { Request } from "express";
+import { AuthPayload } from "src/common/types";
 
 @Controller("/user")
+@ApiBearerAuth("JWT-auth")
+@UseGuards(JwtGuard, RolesGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post("/")
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
-  }
-
-  @ApiBearerAuth("JWT-auth")
   @Roles(UserRole.ADMIN)
-  @UseGuards(JwtGuard, RolesGuard)
   @Get("/")
   findAll(@Query() query: UserQueryDto) {
     const {
@@ -97,8 +101,11 @@ export class UserController {
     });
   }
 
+  @Roles(UserRole.ADMIN, UserRole.USER)
   @Get(":id")
-  findOne(@Param("id", ParseUUIDPipe) id: string) {
+  findOne(@Param("id", ParseUUIDPipe) id: string, @Req() req: Request) {
+    const { sub, role } = req.user as AuthPayload;
+    if (role !== UserRole.ADMIN && sub !== id) throw new ForbiddenException();
     return this.userService.findExistingOne({
       where: { id },
       select: {
@@ -108,10 +115,21 @@ export class UserController {
         middleName: true,
         lastName: true,
         email: true,
-        createdAt: true,
-        isActive: true,
-        role: true,
+        createdAt: role === UserRole.ADMIN && sub !== id,
+        updatedAt: role === UserRole.ADMIN && sub !== id,
+        isActive: role === UserRole.ADMIN && sub !== id,
+        role: role === UserRole.ADMIN && sub !== id,
         balance: true,
+        addresses: {
+          id: true,
+          address1: true,
+          address2: true,
+          city: { id: true, name: true, government: { id: true, name: true } },
+          street: true,
+        },
+      },
+      relations: {
+        addresses: { city: { government: true } },
       },
     });
   }
@@ -119,11 +137,15 @@ export class UserController {
   @Patch(":id")
   update(
     @Param("id", ParseUUIDPipe) id: string,
-    @Body() updateUserDto: UpdateUserDto
+    @Body() updateUserDto: UpdateUserDto,
+    @Req() req: Request
   ) {
+    const { sub } = req.user as AuthPayload;
+    if (sub !== id) throw new ForbiddenException();
     return this.userService.update(id, updateUserDto);
   }
 
+  @Roles(UserRole.ADMIN)
   @Delete(":id")
   remove(@Param("id", ParseUUIDPipe) id: string) {
     return this.userService.remove(id);
