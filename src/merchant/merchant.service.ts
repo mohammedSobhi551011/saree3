@@ -6,7 +6,8 @@ import {
 import { InjectRepository } from "@nestjs/typeorm";
 import { Merchant, MerchantRole } from "./entities/merchant.entity";
 import { FindManyOptions, FindOneOptions, Not, Repository } from "typeorm";
-import { CreateMerchantDto, UpdateMerchantDto } from "./dto/merchant.dto.";
+import { UpdateMerchantDto } from "./dto/update-merchant.dto";
+import { CreateMerchantDto } from "./dto/create-merchant.dto";
 
 @Injectable()
 export class MerchantService {

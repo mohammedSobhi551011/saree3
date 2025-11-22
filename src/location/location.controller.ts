@@ -12,47 +12,44 @@ import {
 import { LocationService } from "./location.service";
 import { Like } from "typeorm";
 import { ApiCreatedResponse, ApiOkResponse } from "@nestjs/swagger";
-import {
-  CreateGovernmentDto,
-  GovernmentResponseDto,
-  QueryGovernmentDto,
-  UpdateGovernmentDto,
-} from "./dto/government.dto";
-import {
-  CityResponseDto,
-  CreateCityDto,
-  QueryCitiesDto,
-  QueryCityDto,
-  UpdateCityDto,
-} from "./dto/city.dto";
+import { getBooleanFromString } from "src/helpers";
+import { CityResponseDto } from "./dto/city/city-response.dto";
+import { CreateCityDto } from "./dto/city/create-city.dto";
+import { CityQueryDto } from "./dto/city/city-query.dto";
+import { GovernmentsResponseDto } from "./dto/government/government-response.dto";
+import { CreateGovernmentDto } from "./dto/government/create-government.dto";
+import { GovernmentQueryDto } from "./dto/government/government-query.dto";
+import { UpdateGovernmentDto } from "./dto/government/update-government.dto";
+import { CitiesResponseDto } from "./dto/city/cities-reponse.dto";
+import { UpdateCityDto } from "./dto/city/update-city.dto";
 
 @Controller("location")
 export class LocationController {
   constructor(private readonly locationService: LocationService) {}
 
   @Post("/government")
-  @ApiCreatedResponse({ type: GovernmentResponseDto })
+  @ApiCreatedResponse({ type: GovernmentsResponseDto })
   createGovernment(@Body() createGovernmentDto: CreateGovernmentDto) {
     return this.locationService.createGovernment(createGovernmentDto);
   }
 
   @Get("/government")
   @ApiOkResponse({
-    type: GovernmentResponseDto,
+    type: [GovernmentsResponseDto],
   })
-  findAllGovernment(@Query() query: QueryGovernmentDto) {
-    const { limit, name, page, hasCities } = query;
+  findAllGovernment(@Query() query: GovernmentQueryDto) {
+    const { limit, name, page, withCities } = query;
 
     return this.locationService.findAllGovernments({
       select: { id: true, name: true, cities: { id: true, name: true } },
       where: { name: name ? Like(`%${name}%`) : undefined },
       take: limit,
       skip: (page - 1) * limit,
-      relations: { cities: hasCities === "true" },
+      relations: { cities: getBooleanFromString(withCities) },
     });
   }
 
-  @ApiOkResponse({ type: GovernmentResponseDto })
+  @ApiOkResponse()
   @Patch("/government/:id")
   updateGovernment(
     @Param("id", ParseIntPipe) id: number,
@@ -74,36 +71,76 @@ export class LocationController {
     return this.locationService.createCity(createCityDto);
   }
 
-  @ApiOkResponse({ type: CityResponseDto })
+  @ApiOkResponse({ type: [CitiesResponseDto] })
   @Get("city")
-  findAllCity(@Query() query: QueryCitiesDto) {
-    const { limit, name, page, governmentId, hasGovernment } = query;
+  findAllCity(@Query() query: CityQueryDto) {
+    const { limit, name, page, governmentId, withGovernment, withMarkets } =
+      query;
 
     return this.locationService.findAllCities({
-      select: { id: true, name: true, government: { id: true, name: true } },
+      select: {
+        id: true,
+        name: true,
+        government: { id: true, name: true },
+        markets: {
+          id: true,
+          name: true,
+          address: true,
+          owner: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            middleName: true,
+            email: true,
+          },
+        },
+      },
       where: {
         name: name ? Like(`%${name}%`) : undefined,
         government: governmentId ? { id: governmentId } : undefined,
       },
       take: limit,
       skip: page && limit ? (page - 1) * limit : undefined,
-      relations: { government: hasGovernment === "true" },
+      relations: {
+        government: getBooleanFromString(withGovernment),
+        markets: {
+          owner: getBooleanFromString(withMarkets),
+        },
+      },
     });
   }
 
   @ApiOkResponse({ type: CityResponseDto })
   @Get("city/:id")
-  findCity(@Query() query: QueryCityDto, @Param("id",ParseIntPipe) id:number) {
-    const { hasMarkets, hasGovernment } = query;
-
+  findCity(@Param("id", ParseIntPipe) id: number) {
     return this.locationService.findOneCity({
-      select: { id: true, name: true, government: { id: true, name: true },markets:{id:true,name:true,address:true,owner:{id:true,username:true,fullName:true}} },
+      select: {
+        id: true,
+        name: true,
+        government: { id: true, name: true },
+        markets: {
+          id: true,
+          name: true,
+          address: true,
+          owner: {
+            id: true,
+            username: true,
+            firstName: true,
+            middleName: true,
+            lastName: true,
+            email: true,
+          },
+        },
+      },
       where: {
         id,
       },
-      relations: { government: hasGovernment === "true",markets:{
-        owner: hasMarkets==="true"
-      } },
+      relations: {
+        government: true,
+        markets: {
+          owner: true,
+        },
+      },
     });
   }
 

@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { CreateMarketDto, UpdateMarketDto } from "./dto/market.dto";
 import { FindManyOptions, FindOneOptions, Repository } from "typeorm";
 import { Market } from "./entities/market.entity";
 import { InjectRepository } from "@nestjs/typeorm";
-import { UserService } from "src/user/user.service";
 import { LocationService } from "src/location/location.service";
 import { MerchantService } from "src/merchant/merchant.service";
+import { CreateMarketDto } from "./dto/create-market.dto";
+import { UpdateMarketDto } from "./dto/update-market.dto";
 
 @Injectable()
 export class MarketService {

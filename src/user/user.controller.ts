@@ -1,7 +1,6 @@
 import {
   Controller,
   Get,
-  Post,
   Body,
   Patch,
   Param,
@@ -13,14 +12,8 @@ import {
   ForbiddenException,
 } from "@nestjs/common";
 import { UserService } from "./user.service";
-import { CreateUserDto, UpdateUserDto, UserQueryDto } from "./dto/user.dto";
 import { JwtGuard } from "src/auth/guards/jwt.guard";
-import {
-  ApiBearerAuth,
-  ApiOkResponse,
-  ApiResponse,
-  PickType,
-} from "@nestjs/swagger";
+import { ApiBearerAuth, ApiOkResponse } from "@nestjs/swagger";
 import { Like } from "typeorm";
 import {
   getBooleanFromString,
@@ -32,6 +25,9 @@ import { RolesGuard } from "src/auth/guards/roles.guard";
 import { Roles } from "src/auth/decorators/roles.decorator";
 import type { Request } from "express";
 import { AuthPayload } from "src/common/types";
+import { UsersReponseDto } from "./dto/user-response.dto";
+import { UserQueryDto } from "./dto/user-query.dto";
+import { UpdateUserDto } from "./dto/update-user.dto";
 
 @Controller("/user")
 @ApiBearerAuth("JWT-auth")
@@ -39,6 +35,7 @@ import { AuthPayload } from "src/common/types";
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @ApiOkResponse({ type: [UsersReponseDto] })
   @Roles(UserRole.ADMIN)
   @Get("/")
   findAll(@Query() query: UserQueryDto) {

@@ -6,7 +6,8 @@ import {
 import { InjectRepository } from "@nestjs/typeorm";
 import { Delivery, DeliveryRole } from "./entities/delivery.entity";
 import { FindManyOptions, FindOneOptions, Not, Repository } from "typeorm";
-import { CreateDeliveryDto, UpdateDeliveryDto } from "./dto/delivery.dto";
+import { CreateDeliveryDto } from "./dto/create-delivery.dto";
+import { UpdateDeliveryDto } from "./dto/update-delivery.dto";
 
 @Injectable()
 export class DeliveryService {

@@ -6,7 +6,8 @@ import {
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "./entities/user.entity";
 import { FindManyOptions, FindOneOptions, Not, Repository } from "typeorm";
-import { CreateUserDto, UpdateUserDto } from "./dto/user.dto";
+import { CreateUserDto } from "./dto/create-user.dto";
+import { UpdateUserDto } from "./dto/update-user.dto";
 
 @Injectable()
 export class UserService {

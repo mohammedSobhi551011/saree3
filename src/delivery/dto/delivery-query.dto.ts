@@ -1,17 +1,7 @@
-import { QueryDto } from "src/common/dto/query.dto";
-import {
-  CreateUserDto,
-  UpdateUserDto,
-  UserActivationTriggerDto,
-} from "src/user/dto/user.dto";
-import { BaseUserQueryDto } from "src/common/dto/base-user-query.dto";
 import { ApiProperty } from "@nestjs/swagger";
 import { IsEnum, IsOptional } from "class-validator";
 import { DeliveryRole } from "../entities/delivery.entity";
-
-export class CreateDeliveryDto extends CreateUserDto {}
-export class UpdateDeliveryDto extends UpdateUserDto {}
-export class DeliveryActivationTriggerDto extends UserActivationTriggerDto {}
+import { BaseUserQueryDto } from "src/common/dto/user/base-user-query.dto";
 
 export class DeliveryQueryDto extends BaseUserQueryDto {
   @ApiProperty({

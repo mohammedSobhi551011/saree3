@@ -20,11 +20,6 @@ import {
 import { Like } from "typeorm";
 import { DeliveryService } from "./delivery.service";
 import { Delivery, DeliveryRole } from "./entities/delivery.entity";
-import {
-  CreateDeliveryDto,
-  DeliveryQueryDto,
-  UpdateDeliveryDto,
-} from "./dto/delivery.dto";
 import { JwtGuard } from "src/auth/guards/jwt.guard";
 import { RolesGuard } from "src/auth/guards/roles.guard";
 import { ApiBearerAuth } from "@nestjs/swagger";
@@ -32,6 +27,8 @@ import { Roles } from "src/auth/decorators/roles.decorator";
 import { UserRole } from "src/user/entities/user.entity";
 import type { Request } from "express";
 import { AuthPayload } from "src/common/types";
+import { DeliveryQueryDto } from "./dto/delivery-query.dto";
+import { UpdateDeliveryDto } from "./dto/update-delivery.dto";
 
 @Controller("delivery")
 @UseGuards(JwtGuard, RolesGuard)

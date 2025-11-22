@@ -9,7 +9,8 @@ import {
   ParseIntPipe,
 } from "@nestjs/common";
 import { MarketService } from "./market.service";
-import { CreateMarketDto, UpdateMarketDto } from "./dto/market.dto";
+import { CreateMarketDto } from "./dto/create-market.dto";
+import { UpdateMarketDto } from "./dto/update-market.dto";
 
 @Controller("market")
 export class MarketController {

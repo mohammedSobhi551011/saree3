@@ -1,18 +1,8 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsEnum, IsNumber, IsOptional } from "class-validator";
-import { Transform } from "class-transformer";
-import { BaseUserQueryDto } from "src/common/dto/base-user-query.dto";
-import {
-  CreateUserDto,
-  UpdateUserDto,
-  UserActivationTriggerDto,
-} from "src/user/dto/user.dto";
+import { BaseUserQueryDto } from "src/common/dto/user/base-user-query.dto";
 import { MerchantRole } from "../entities/merchant.entity";
-
-export class CreateMerchantDto extends CreateUserDto {}
-export class UpdateMerchantDto extends UpdateUserDto {}
-
-export class MerchantActivationTriggerDto extends UserActivationTriggerDto {}
+import { Transform } from "class-transformer";
 
 export class MerchantQuery extends BaseUserQueryDto {
   @ApiProperty({

@@ -1,17 +1,19 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Government } from './entities/government.entity';
-import { City } from './entities/city.entity';
-import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
-import { CreateGovernmentDto, UpdateGovernmentDto } from './dto/government.dto';
-import { CreateCityDto, UpdateCityDto } from './dto/city.dto';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Government } from "./entities/government.entity";
+import { City } from "./entities/city.entity";
+import { FindManyOptions, FindOneOptions, Repository } from "typeorm";
+import { CreateCityDto } from "./dto/city/create-city.dto";
+import { CreateGovernmentDto } from "./dto/government/create-government.dto";
+import { UpdateGovernmentDto } from "./dto/government/update-government.dto";
+import { UpdateCityDto } from "./dto/city/update-city.dto";
 
 @Injectable()
 export class LocationService {
   constructor(
     @InjectRepository(Government)
     private governmentRepo: Repository<Government>,
-    @InjectRepository(City) private cityRepo: Repository<City>,
+    @InjectRepository(City) private cityRepo: Repository<City>
   ) {}
 
   createGovernment(createGovernmentDto: CreateGovernmentDto) {
@@ -31,7 +33,7 @@ export class LocationService {
   async findExistingOneGovernment(options: FindOneOptions<Government>) {
     const government = await this.findOneGovernement(options);
     if (!government) {
-      throw new NotFoundException('Government is not found');
+      throw new NotFoundException("Government is not found");
     }
     return government;
   }
@@ -39,7 +41,8 @@ export class LocationService {
   async updateGovernment(id: number, updateGovernmentDto: UpdateGovernmentDto) {
     const government = await this.findExistingOneGovernment({ where: { id } });
     government.name = updateGovernmentDto.name || government.name;
-    return this.governmentRepo.save(government);
+    await this.governmentRepo.save(government);
+    return;
   }
 
   async removeGovernment(id: number) {
@@ -67,7 +70,7 @@ export class LocationService {
   async findExistingOneCity(options: FindOneOptions<City>) {
     const city = await this.findOneCity(options);
     if (!city) {
-      throw new NotFoundException('City is not found');
+      throw new NotFoundException("City is not found");
     }
     return city;
   }

@@ -10,6 +10,7 @@ import { ConfigModule } from "@nestjs/config";
 import { AuthModule } from "./auth/auth.module";
 import { DeliveryModule } from './delivery/delivery.module';
 import { MerchantModule } from './merchant/merchant.module';
+import { AddressModule } from './address/address.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { MerchantModule } from './merchant/merchant.module';
     AuthModule,
     DeliveryModule,
     MerchantModule,
+    AddressModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -2,22 +2,17 @@ import { BadRequestException, Injectable } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { AuthPayload } from "src/common/types";
 import { DeliveryService } from "src/delivery/delivery.service";
-import { CreateDeliveryDto } from "src/delivery/dto/delivery.dto";
-import { CreateMerchantDto } from "src/merchant/dto/merchant.dto.";
+import { CreateDeliveryDto } from "src/delivery/dto/create-delivery.dto";
+import { CreateMerchantDto } from "src/merchant/dto/create-merchant.dto";
 import { MerchantService } from "src/merchant/merchant.service";
+import { CreateUserDto } from "src/user/dto/create-user.dto";
 // import { CreateDeliveryDto } from "src/user/dto/delivery.dto";
 // import { CreateMerchantDto } from "src/user/dto/merchant.dto.";
-import { CreateUserDto } from "src/user/dto/user.dto";
 import { UserService } from "src/user/user.service";
 
 @Injectable()
 export class AuthService {
-  constructor(
-    private readonly userService: UserService,
-    private readonly merchantService: MerchantService,
-    private readonly deliveryService: DeliveryService,
-    private readonly jwtService: JwtService
-  ) {}
+  constructor(private readonly jwtService: JwtService) {}
 
   // User Methods
   async login(

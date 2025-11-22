@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { QueryDto } from "./query.dto";
+import { Transform } from "class-transformer";
 import {
   IsEmail,
   IsEnum,
@@ -8,9 +8,9 @@ import {
   IsOptional,
   IsString,
 } from "class-validator";
-import { Transform } from "class-transformer";
+import { BaseQueryDto } from "../base-query.dto";
 
-export class BaseUserQueryDto extends QueryDto {
+export class BaseUserQueryDto extends BaseQueryDto {
   @ApiProperty({
     description: "The name of the user",
     example: "John",

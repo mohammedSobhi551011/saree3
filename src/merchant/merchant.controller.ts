@@ -13,11 +13,6 @@ import {
 } from "@nestjs/common";
 import { MerchantService } from "./merchant.service";
 import {
-  // CreateMerchantDto,
-  MerchantQuery,
-  UpdateMerchantDto,
-} from "./dto/merchant.dto.";
-import {
   getBooleanFromString,
   getNumberRangeFindOperator,
   getWhereOrOptions,
@@ -31,6 +26,8 @@ import { AuthPayload } from "src/common/types";
 import { ApiBearerAuth } from "@nestjs/swagger";
 import { JwtGuard } from "src/auth/guards/jwt.guard";
 import { RolesGuard } from "src/auth/guards/roles.guard";
+import { MerchantQuery } from "./dto/merchant-query.dto";
+import { UpdateMerchantDto } from "./dto/update-merchant.dto";
 
 @Controller("merchant")
 @UseGuards(JwtGuard, RolesGuard)

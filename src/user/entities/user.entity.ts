@@ -1,7 +1,7 @@
 import { Column, Entity, OneToMany } from "typeorm";
-import { Address } from "./address.entity";
 import { Order } from "src/order/entities/order.entity";
 import { BaseUser } from "src/common/entities/base-user.entity";
+import { Address } from "src/address/entities/address.entity";
 
 export enum UserRole {
   ADMIN = "admin",

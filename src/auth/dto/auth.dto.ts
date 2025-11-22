@@ -1,8 +1,8 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsNotEmpty, IsString } from "class-validator";
-import { CreateDeliveryDto } from "src/delivery/dto/delivery.dto";
-import { CreateMerchantDto } from "src/merchant/dto/merchant.dto.";
-import { CreateUserDto } from "src/user/dto/user.dto";
+import { CreateDeliveryDto } from "src/delivery/dto/create-delivery.dto";
+import { CreateMerchantDto } from "src/merchant/dto/create-merchant.dto";
+import { CreateUserDto } from "src/user/dto/create-user.dto";
 
 export class LoginDto {
   @ApiProperty({ example: "testuser", description: "Username of the user" })
