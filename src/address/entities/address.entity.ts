@@ -16,6 +16,9 @@ export class Address {
   @ManyToOne(() => City, (city) => city.addresses, { onDelete: "SET NULL" })
   city: City | null;
 
+  @Column({ type: "number", nullable: true })
+  cityId: number | null;
+
   @ManyToOne(() => User, (user) => user.addresses, { onDelete: "CASCADE" })
   user: User;
 }

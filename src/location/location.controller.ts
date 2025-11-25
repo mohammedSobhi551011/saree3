@@ -8,6 +8,7 @@ import {
   Delete,
   Query,
   ParseIntPipe,
+  UseGuards,
 } from "@nestjs/common";
 import { LocationService } from "./location.service";
 import { Like } from "typeorm";
@@ -22,11 +23,17 @@ import { GovernmentQueryDto } from "./dto/government/government-query.dto";
 import { UpdateGovernmentDto } from "./dto/government/update-government.dto";
 import { CitiesResponseDto } from "./dto/city/cities-reponse.dto";
 import { UpdateCityDto } from "./dto/city/update-city.dto";
+import { JwtGuard } from "src/auth/guards/jwt.guard";
+import { RolesGuard } from "src/auth/guards/roles.guard";
+import { Roles } from "src/auth/decorators/roles.decorator";
+import { UserRole } from "src/user/entities/user.entity";
 
 @Controller("location")
 export class LocationController {
   constructor(private readonly locationService: LocationService) {}
 
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   @Post("/government")
   @ApiCreatedResponse({ type: GovernmentsResponseDto })
   createGovernment(@Body() createGovernmentDto: CreateGovernmentDto) {
@@ -49,6 +56,8 @@ export class LocationController {
     });
   }
 
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   @ApiOkResponse()
   @Patch("/government/:id")
   updateGovernment(
@@ -58,6 +67,8 @@ export class LocationController {
     return this.locationService.updateGovernment(id, updateGovernmentDto);
   }
 
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   @ApiOkResponse()
   @Delete("government/:id")
   removeGovernment(@Param("id", ParseIntPipe) id: number) {
@@ -65,6 +76,8 @@ export class LocationController {
     return;
   }
 
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   @ApiCreatedResponse({ type: CityResponseDto })
   @Post("city")
   createCity(@Body() createCityDto: CreateCityDto) {
@@ -110,6 +123,8 @@ export class LocationController {
     });
   }
 
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   @ApiOkResponse({ type: CityResponseDto })
   @Get("city/:id")
   findCity(@Param("id", ParseIntPipe) id: number) {
@@ -144,6 +159,8 @@ export class LocationController {
     });
   }
 
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   @ApiOkResponse({ type: CityResponseDto })
   @Patch("city/:id")
   updateCity(
@@ -153,6 +170,8 @@ export class LocationController {
     return this.locationService.updateCity(id, updateCityDto);
   }
 
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   @ApiOkResponse()
   @Delete("city/:id")
   removeCity(@Param("id", ParseIntPipe) id: number) {
